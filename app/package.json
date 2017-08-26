@@ -1,5 +1,5 @@
 {
-  "name": "bulletin backend",
+  "name": "bulletin-backend",
   "version": "1.0.0",
   "description": "Bulletin is an application for iOS and Android platform",
   "main": "bulletin.js",

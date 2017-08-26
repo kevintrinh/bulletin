@@ -1,6 +1,7 @@
 var express = require('express');
 var q = require('Q');
 var User = require('../models/user');
+var resGenerator = require('../common/resGenerator');
 
 var router = express.Router();
 
@@ -10,8 +11,8 @@ router.use(function(req, res, next) {
     if (checkEmailFormat(email)) {
       next();
     } else {
-      res.status(400);
-      res.send('Bad Request: invalid email format');
+      res.status(200);
+      res.send(resGenerator.createResJson(resGenerator.INVALID_EMAIL_FORMAT));
     }
   });
 
@@ -20,10 +21,10 @@ router.post('/newuser', function(req, res) {
 
     let email = req.body.email;
     let password = req.body.password || ' ';
-
+    res.status(200);
     if (!checkPasswordFormat(password)) {
-      res.status(400);
-      return res.send('Bad Request: invalid password format');
+      return res.send(resGenerator.createResJson(
+          resGenerator.INVALID_EMAIL_FORMAT));
     }
 
     checkEmailExist(email)
@@ -31,26 +32,24 @@ router.post('/newuser', function(req, res) {
 
             saveUserToDb(email, password)
                 .then(function() {
-                    res.status(200);
-                    return res.send('Success: user has successfully created!');
+                    return res.send(resGenerator.createResJson(
+                        resGenerator.SUCCESS));
                   })
                 .fail(function(err) {
-                    if (err == 400) {
-                      res.status(202);
-                      return res.send('Accepted: the email is already exist!');
-                    } else {
-                      res.status(500);
-                      return res.send('Server Internal Error: not able' +
-                          ' to save data into mongodb');
-                    }
-
+                    return res.send(resGenerator.createResJson(
+                        resGenerator.DATABASE_ERROR));
                   })
                 .done();
           })
 
-        .fail(function() {
-            res.status(400);
-            return res.send('Bad Request: email already existed');
+        .fail(function(err) {
+            if (err == 400) {
+              return res.send(resGenerator.createResJson(
+                    resGenerator.EMAIL_ALREADY_EXIST));
+            } else {
+              return res.send(resGenerator.createResJson(
+                  resGenerator.DATABASE_ERROR));
+            }
           });
 
   });
@@ -58,21 +57,20 @@ router.post('/newuser', function(req, res) {
 router.get('/checkemail', function(req, res) {
 
     let email = req.query.email;
+    res.status(200);
 
     checkEmailExist(email)
         .then(function() {
-            res.status(200);
-            return res.send('Success: the email does not exist!');
+            return res.send(resGenerator.createResJson(resGenerator.SUCCESS));
           })
         .fail(function(err) {
-          if (err == 400) {
-            res.status(202);
-            return res.send('Accept: the mail is already exist!');
-          } else {
-            res.status(500);
-            return res.send('Server Internal Error: not able' +
-                ' to save data into mongodb');
-          }
+            if (err == 400) {
+              return res.send(resGenerator.createResJson(
+                  resGenerator.EMAIL_ALREADY_EXIST));
+            } else {
+              return res.send(resGenerator.createResJson(
+                  resGenerator.DATABASE_ERROR));
+            }
 
           });
 
