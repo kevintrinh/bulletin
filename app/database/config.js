@@ -1,3 +1,3 @@
-module.exports= {
-    'db_users' : 'mongodb://localhost/users'
-}
+module.exports = {
+    'dbUsers': 'mongodb://localhost/users'
+  };

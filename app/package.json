@@ -1,7 +1,7 @@
 {
-  "name": "bulletinapp",
+  "name": "bulletin backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Bulletin is an application for iOS and Android platform",
   "main": "bulletin.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,6 +11,7 @@
   "dependencies": {
     "body-parser": "^1.17.2",
     "express": "^4.15.4",
+    "log4js": "^2.3.3",
     "mongoose": "^4.11.7",
     "q": "^1.5.0"
   }

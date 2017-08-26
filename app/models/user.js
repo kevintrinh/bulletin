@@ -11,27 +11,27 @@ var userSchema = Schema({
         unique: true,
         validate: {
             validator: function(email) {
-                return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.+-]+\.edu$/.test(email)
-            },
+                return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.+-]+\.edu$/.test(email);
+              },
             message: '{VALUE} is not a valid .edu email'
-        }
-    },
+          }
+      },
     password: {
         type: String,
         required: true
-    },
-    create_at: {
+      },
+    createAt: {
         type: Date,
         default: Date.now
-    },
-    updated_at: Date
-}, {collection: 'users'});
+      },
+    updatedAt: Date
+  }, {collection: 'users'});
 
 //save date
 userSchema.pre('save', function(next) {
     var currentDate = new Date();
-    this.updated_at = currentDate;
+    this.updatedAt = currentDate;
     next();
-});
+  });
 
 module.exports = db.users.model('users', userSchema, 'users');

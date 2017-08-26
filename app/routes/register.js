@@ -5,125 +5,132 @@ var User = require('../models/user');
 var router = express.Router();
 
 //Format checking if is valid email address. Also for string filtering reason.
-router.use(function (req, res, next) {
-    let email = req.body.email || req.query.email || " ";
+router.use(function(req, res, next) {
+    let email = req.body.email || req.query.email || ' ';
     if (checkEmailFormat(email)) {
-        next();
+      next();
     } else {
-        res.status(400);
-        res.send('Bad Request: invalid email format');
+      res.status(400);
+      res.send('Bad Request: invalid email format');
     }
-});
+  });
 
 //Register a new users
-router.post('/newuser',function(req, res) {
+router.post('/newuser', function(req, res) {
 
     let email = req.body.email;
-    let password = req.body.password || " ";
+    let password = req.body.password || ' ';
 
     if (!checkPasswordFormat(password)) {
-        res.status(400);
-        return res.send('Bad Request: invalid password format');
+      res.status(400);
+      return res.send('Bad Request: invalid password format');
     }
 
     checkEmailExist(email)
-        .then (function() {
+        .then(function() {
 
             saveUserToDb(email, password)
                 .then(function() {
                     res.status(200);
                     return res.send('Success: user has successfully created!');
-                })
-                .fail(function() {
-                    res.status(500);
-                    return res.send('Server Internal Error: not able to save data into mongodb');
-                })
-                .done()
-        })
+                  })
+                .fail(function(err) {
+                    if (err == 400) {
+                      res.status(202);
+                      return res.send('Accepted: the email is already exist!');
+                    } else {
+                      res.status(500);
+                      return res.send('Server Internal Error: not able' +
+                          ' to save data into mongodb');
+                    }
+
+                  })
+                .done();
+          })
 
         .fail(function() {
             res.status(400);
             return res.send('Bad Request: email already existed');
-        });
+          });
 
-
-
-
-});
+  });
 
 router.get('/checkemail', function(req, res) {
 
     let email = req.query.email;
-    console.log(email);
+
     checkEmailExist(email)
         .then(function() {
             res.status(200);
             return res.send('Success: the email does not exist!');
-        })
-        .fail(function() {
+          })
+        .fail(function(err) {
+          if (err == 400) {
             res.status(202);
             return res.send('Accept: the mail is already exist!');
-        });
+          } else {
+            res.status(500);
+            return res.send('Server Internal Error: not able' +
+                ' to save data into mongodb');
+          }
 
-});
+          });
+
+  });
 
 function saveUserToDb(email, password) {
 
-    var deferred = q.defer();
-    var newUser = new User({
-        email: email,
-        password: password
-    });
+  var deferred = q.defer();
+  var newUser = new User({
+    email: email,
+    password: password
+  });
 
-    newUser.save(function (err) {
+  newUser.save(function(err) {
         if (err) {
-            console.log(err);
-            deferred.reject(err);
+          console.log(err);
+          deferred.reject(err);
         } else {
-            deferred.resolve();
+          deferred.resolve();
         }
 
-    });
-    return deferred.promise;
+      });
+  return deferred.promise;
 }
 
 function checkEmailExist(email) {
-    //logic for checking if email exist
+  //logic for checking if email exist
 
-    var deferred = q.defer();
-    console.log("look for ", email)
-    User.findOne( {
+  var deferred = q.defer();
+
+  User.findOne({
         email: email
-    }, function (err, result) {
+      }, function(err, result) {
         if (err) {
-            console.log(err);
-            deferred.reject(err);
+          console.log(err);
+          deferred.reject(err);
         } else {
-            console.log(result);
-            if (result == null) {
-                deferred.resolve()
-            } else {
-                deferred.reject();
-            }
+          if (result == null) {
+            deferred.resolve();
+          } else {
+            deferred.reject(400);
+          }
         }
 
-    });
+      });
 
-    return deferred.promise;
-
+  return deferred.promise;
 }
 
 function checkEmailFormat(email) {
-    //reg for checking .edu email
-   return email.match("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.+-]+\\.edu$");
+  //reg for checking .edu email
+  return email.match('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.+-]+\\.edu$');
 }
 
 function checkPasswordFormat(password) {
-    //reg for checking password format
-    //password has to be at least 6 characters, contains one letter and one number
-    return password.match("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$");
+  //reg for checking password format
+  //password has to be at least 6 characters, contains one letter and one number
+  return password.match('^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$');
 }
-
-
 
 module.exports = router;
