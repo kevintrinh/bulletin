@@ -1,0 +1,5 @@
+mongodb
+app/node_modules
+app/.idea/*
+app/.idea/workspace.xml
+
