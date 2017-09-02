@@ -17,6 +17,8 @@ var responseTable = {
     200: '',
     100: 'The email is already existed',
     101: 'Invalid email format',
+    102: 'Invalid parameter format',
+    103: 'Wrong password',
     300: 'Failed to get result from database',
   };
 
@@ -38,8 +40,11 @@ function createResJson(statusCode, result) {
 
 module.exports = {
   SUCCESS: 200, // request success, no return value
+  AUTH_TOKEN: 201,
   EMAIL_ALREADY_EXIST: 100,
   INVALID_EMAIL_FORMAT: 101,
+  INVALID_PARAM_FORMAT: 102,
+  WRONG_PASSWORD: 103,
   DATABASE_ERROR: 300,
   createResJson: createResJson
 };
